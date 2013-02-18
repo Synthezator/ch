@@ -1,0 +1,23 @@
+﻿<!DOCTYPE html>
+<html>
+	<head>
+		<title>Многочлены Чебышева :: Визуализация</title>
+	</head>
+	<body vlink="black" link="black" style="background-image: url(images/blue_bg.jpg);background-position: left top; font-family:Arial">
+		
+		<hr/>
+
+		<!-- Main hero unit for a primary marketing message or call to action -->
+      <div class="hero-unit"  id="main-hero-unit">
+        <p>Белорусский государственный университет</p>
+        <p>Факультет прикладной математики и информатики</p>
+        <p>Специальность "Информатика"</p>
+        <p>Леоненко Павел</p>
+      </div>
+		
+		<hr/>
+		<div id="footer" align="center">
+			Леоненко П.В.
+		</div>
+	</body>
+</html>

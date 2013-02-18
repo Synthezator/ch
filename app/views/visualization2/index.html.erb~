@@ -1,0 +1,206 @@
+﻿<div align="center" width="100%" id="mainDiv">
+		<canvas id='canv' width='800' height='450' style='border:1px black solid'>
+			Ваш браузер не поддерживает HTML5 :(
+		</canvas>
+		<p id="polyP"></p>
+</div>
+<script language="javascript">
+	var ticks = (new Date()).getTime();
+	var canv = document.getElementById("canv");
+    var ctx = canv.getContext('2d');
+	ctx.fillStyle = "#fcfcfc";
+	ctx.fillRect(0,0,canv.width,canv.height);
+	var w = canv.width - 85;
+	var h = canv.height;
+	var eps = 20;
+	var rw = w - eps;
+	var rh = h - eps;
+	
+	//axes
+	ctx.beginPath();
+	ctx.moveTo(w/2,0);
+	ctx.lineTo(w/2,h);
+	ctx.strokeStyle = "#991122";
+	ctx.stroke();
+	ctx.beginPath();
+	ctx.moveTo(0,h/2);
+	ctx.lineTo(w,h/2);
+	ctx.stroke();
+	
+	//labels
+	ctx.fillStyle = '#555555';
+	ctx.font = '10px arial';
+	ctx.beginPath();
+	ctx.arc(w/2,h/2,3,0,2*Math.PI,false);
+	ctx.stroke();
+	
+	//Ox
+	for (var i=1; i<=10; ++i) {
+		ctx.fillText(i==10?i/10+".0":"0." + i,w/2 + i*(rw/20) -8,h/2+12);
+		ctx.beginPath();
+		ctx.moveTo(w/2 + i*(rw/20),h/2-2);
+		ctx.lineTo(w/2 + i*(rw/20),h/2+2);
+		ctx.stroke();
+				
+		ctx.fillText(i==10?-i/10+".0":"-0." + i,w/2 - i*(rw/20) -12,h/2+12);
+		ctx.beginPath();
+		ctx.moveTo(w/2 - i*(rw/20),h/2-2);
+		ctx.lineTo(w/2 - i*(rw/20),h/2+2);
+		ctx.stroke();		
+	}
+	
+	//Oy
+	for (var i=1; i<=10; ++i) {
+		ctx.fillText(i==10?-i/10+".0":"-0." + i,w/2-23,h/2 + i*(rh/20)+4);
+		ctx.beginPath();
+		ctx.moveTo(w/2-2,h/2+i*(rh/20));
+		ctx.lineTo(w/2+2,h/2+i*(rh/20));
+		ctx.stroke();
+		
+		ctx.fillText(i==10?i/10+".0":"0." + i,w/2-20,h/2 - i*(rh/20)+4);
+		ctx.beginPath();
+		ctx.moveTo(w/2-2,h/2-i*(rh/20));
+		ctx.lineTo(w/2+2,h/2-i*(rh/20));
+		ctx.stroke();
+	}	
+	
+	//legend
+	ctx.strokeStyle = "#000000";
+	ctx.beginPath();	
+	ctx.lineWidth = 1;
+	ctx.moveTo(w+15,15);
+	ctx.lineTo(w+15,h-15);
+	ctx.stroke();
+</script>
+
+<%
+begin
+	@n = Integer(params[:degree])
+	if @n>25 || @n<0
+		throw Error.new
+	end
+	if @n.class != Fixnum
+		throw Error.new
+	end
+	@all = true
+	if params[:all_polynoms] == 'false'
+		@all = false
+	end
+%>
+<script language="javascript">
+	var f = new Array();
+	f[0] = function(x) { return 1; }
+	f[1] = function(x) { return 2*x; }
+
+	var n = <%=@n-%>;	
+	var all = <%=@all-%>;
+	for (var i=2; i<=n; ++i) {
+		f[i] = new Function("x","return 2*x*f[" + (i-1) + "](x) - f[" + (i-2) + "](x);");		
+	}
+	
+	function getString(n) {
+		if (n==0) {
+			var r = new Array();
+			r[0] = 1;
+			for (var i=1;i<26;++i)
+				r[i] = 0;
+			return r;			
+		}
+		if (n==1) {
+			var r = new Array();			
+			for (var i=0;i<26;++i)
+				r[i] = 0;
+			r[1] = 2;
+			return r;	
+		}
+		
+		var r = getString(n-1);
+		for (var i=24; i>=0; --i)
+			r[i+1] = r[i]*2;
+			
+		r[0] = 0;
+			
+		var r2 = getString(n-2);
+		for (var i=0; i<26; ++i)
+			r[i] -= r2[i];
+		
+		return r;
+	}
+	var r = getString(n);
+	var poly = "";
+	for (var i=25; i>=0; --i) {
+		if (r[i]!=0) {
+			if (r[i]>0) {
+				if (poly!="")
+					poly += " + ";
+				if (i>1) {
+					poly += r[i] + "x<sup>" + i + "</sup>";	
+				}else{				
+					poly += r[i];
+					if (i>0)
+						poly += "x";
+				}
+			}else{
+				if (poly!="")
+					poly += " - ";
+				if (i>1) {
+					poly += (-r[i]) + "x<sup>" + i + "</sup>";	
+				}else{
+					poly += (-r[i]);
+					if (i>0)
+						poly += "x";					
+				}
+			}
+		}	
+	}
+	document.getElementById('polyP').innerHTML = "<i>T<sub>" + n + "</sub>(x) = " + poly + "</i>";
+	
+
+	
+	var step = 0.01;
+	var sr = 23;
+	var sg = 100;
+	var sb = 0;
+	var fr = 200;
+	var fg = 210;
+	var fb = 75;
+	for (var i=0; i<=n; ++i) {
+		if ((i<n) && (!all)) continue;
+		
+		var cx = -1.0;
+		var cy = f[i](cx);
+		
+		ctx.strokeStyle = 'rgb(' + Math.floor(Math.random()*235) + ',' + Math.floor(Math.random()*235) + ',' + Math.floor(Math.random()*235) + ')';
+		ctx.lineWidth = 1;
+		
+		ctx.beginPath();
+		ctx.moveTo(w/2 + cx*(rw/2),h/2 - cy*(rh/2));
+		do {
+			cx += step;
+			cy = f[i](cx);
+			ctx.lineTo(w/2 + cx*(rw/2),h/2 - cy*(rh/2));
+		
+			
+		}while (cx<=1.0);
+		ctx.stroke();
+		
+		var j = all?i:0;
+		
+		ctx.lineWidth = 6;
+		ctx.beginPath();
+		ctx.moveTo(w+22,20+j*16);
+		ctx.lineTo(w+45,20+j*16);
+		ctx.stroke();
+		ctx.fillStyle = ctx.strokeStyle;
+		ctx.fillText("T"+i+"(x)",w+50,23+j*16);
+		
+	}
+	
+	//alert(-ticks+(new Date()).getTime());
+	
+</script>
+<%rescue%>
+	<div align=center>
+	<font color="red">Некорректные данные!</font>
+	</div>
+<%end%>

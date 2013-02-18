@@ -1,0 +1,15 @@
+﻿
+		<form method="get" action="visualization2">
+			<label for="degree">Степень многочлена:</label>
+			<%
+				if params[:degree] == nil
+					params[:degree] = 0
+				end
+			%>
+			<%= text_field_tag 'degree', params[:degree] -%>			
+			<br/>			
+			<%= radio_button_tag 'all_polynoms', 'true',  params[:all_polynoms]==nil||params[:all_polynoms]=='true' -%> Отображать все многочлены до n-го порядка<br/>
+			<%= radio_button_tag 'all_polynoms', 'false', params[:all_polynoms]=='false' -%> Отображать только многочлен n-го порядка
+			<br/>	
+			<input type="submit" name="submit" value="Визуализировать"/>
+		</form>
